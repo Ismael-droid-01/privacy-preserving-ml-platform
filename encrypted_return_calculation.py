@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Cálculo de retorno acumulado de AAPL:
 - En claro
