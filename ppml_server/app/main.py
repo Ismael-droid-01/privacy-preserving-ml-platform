@@ -1,10 +1,16 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
+import tenseal as ts
 
-import numpy as np
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+class HomomorphicLogisticRegression:
+    def __init__(self, context_bytes: bytes):
+        self.context = ts.context_from(context_bytes)
+        self.w = None
+        self.b = None
+
+    def train(self, enc_X_bytes: List[bytes], enc_y_bytes: List[bytes], lr: float = 0.05):
+        pass
 
 app = FastAPI(
     title="privacy-preserving-ml-platform",
