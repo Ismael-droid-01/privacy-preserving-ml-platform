@@ -1,0 +1,7 @@
+pydantic
+pandas
+fastapi
+uvicorn
+dotenv
+tenseal
+pydantic_settings

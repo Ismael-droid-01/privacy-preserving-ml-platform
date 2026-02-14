@@ -1,0 +1,21 @@
+#!/bin/bash
+
+case "$1" in
+  -c|--client)
+    cd client/
+    ng serve
+    ;;
+  -p|--preprocess)
+    cd preprocess_server/
+    source venv/bin/activate
+    uvicorn app.main:app --reload
+    ;;
+  -m|--ppml)
+    cd ppml_server/
+    source venv/bin/activate
+    uvicorn app.main:app --reload --port 8001
+    ;;
+  *)
+    echo "Uso: $0 [-c|--client] [-p|--preprocess] [-m|--ppml]"
+    ;;
+esac

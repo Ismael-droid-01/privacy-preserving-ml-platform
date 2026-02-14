@@ -1,0 +1,56 @@
+<h3>Cargar Dataset</h3>
+
+<input type="file" (change)="onFileSelected($event)" accept=".csv">
+<button (click)="uploadAndProcess()" [disabled]="!selectedFile || isLoading">
+  {{ isLoading ? 'Cargando...' : 'Procesar' }}
+</button>
+
+<p *ngIf="errorMessage">Error: {{ errorMessage }}</p>
+
+<div *ngIf="summary">
+  <hr>
+  <h4>Resultados:</h4>
+  <ul>
+    <li>Filas: {{ summary.n_samples }}</li>
+    <li>Columnas: {{ summary.n_features }}</li>
+    <li>Compatible CKKS: {{ summary.ckks_compatible }}</li>
+    <li>Target válido: {{ summary.target_valid }}</li>
+    <li>CKKS compatible: {{ summary.ckks_compatible }}</li>
+  </ul>
+
+  <p>Columnas Numéricas detectadas:</p>
+  <ul>
+    <li *ngFor="let col of summary.numeric_features">{{ col }}</li>
+  </ul>
+  <p>Columnas No Numéricas detectadas:</p>
+  <ul>
+    <li *ngFor="let col of summary.non_numeric_features">{{ col }}</li>
+  </ul>
+</div>
+
+<div *ngIf="summary && summary.preview && summary.preview.length > 0">
+  
+  <hr>
+  <h3>Vista Previa del Dataset</h3>
+
+  <table border="1" style="border-collapse: collapse; width: 100%;">
+    
+    <thead>
+      <tr>
+        <th *ngFor="let item of summary.preview[0] | keyvalue: preserveOrder" style="padding: 5px; background: #eee;">
+          {{ item.key }}
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let row of summary.preview">
+        <td *ngFor="let item of row | keyvalue: preserveOrder" style="padding: 5px;">
+          {{ item.value }}
+        </td>
+      </tr>
+    </tbody>
+    
+  </table>
+
+</div>
