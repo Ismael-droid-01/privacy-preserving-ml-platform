@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { PreprocessService } from './preprocess.service';
+import { DatasetService } from './dataset.service';
 
-describe('PreprocessService', () => {
-  let service: PreprocessService;
+describe('Dataset', () => {
+  let service: DatasetService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(PreprocessService);
+    service = TestBed.inject(DatasetService);
   });
 
   it('should be created', () => {

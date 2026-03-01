@@ -1,6 +1,0 @@
-requests
-pydantic
-pandas
-fastapi
-uvicorn
-dotenv

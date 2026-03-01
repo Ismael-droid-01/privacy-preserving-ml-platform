@@ -1,7 +1,7 @@
 import uuid
 import os
 import pandas as pd
-from app.core.config import settings
+from config import settings
 
 def get_dataset_by_id(dataset_id: str) -> pd.DataFrame:
     file_path = os.path.join(settings.RAW_DATA_PATH, f"{dataset_id}.csv")

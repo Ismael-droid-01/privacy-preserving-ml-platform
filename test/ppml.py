@@ -5,7 +5,7 @@ import argparse
 URL_BASE = "http://localhost:8000/api/v1/datasets"
 URL_PPML = "http://localhost:8001/train"
 
-def main(file, preview, encrypt):
+def main(file, preview, split, dispatch):
     if file:
         with open(file, "rb") as f:
             csv_base64 = base64.b64encode(f.read()).decode('utf-8')
@@ -32,30 +32,45 @@ def main(file, preview, encrypt):
         else:
             print(f"{response_preview.status_code} - {response_preview.text}")
 
-    if encrypt:
-        response_encrypt = requests.post(f"{URL_BASE}/{encrypt}/encrypt")
+    if split:
+        split_payload = {
+            "test_size": 0.2,
+            "random_state": 42,
+            "shuffle": True
+        }
+        response_split = requests.post(f"{URL_BASE}/{split}/split", json=split_payload)
 
-        if response_encrypt.status_code == 200:
-            data = response_encrypt.json()
-            print(data["encrypted_vector"])
-            confirmation = input("He recibido los datos deseas mandarlos al PPML?")
-            if confirmation.lower() == "yes":
-                print("Enviado por favor espere...")
-            else:
-                print("Ahi nos vemos usuario :)")
-
+        if response_split.status_code == 200:
+            data = response_split.json()
+            print(data["message"])
+            print(f"train_id: {data['train_id']}")
+            print(f"test_id: {data['test_id']}")
+            print(f"sizes: {data['sizes']}")
         else:
-            print(f"{response_encrypt.status_code} - {response_encrypt.text}")
+            print(f"{response_split.status_code} - {response_split.text}")
 
+    if dispatch:
+        response_dispatch = requests.post(f"{URL_BASE}/{dispatch}/dispatch")
+
+        if response_dispatch.status_code == 200:
+            data = response_dispatch.json()
+            print(f"Estado: {data['status']}")
+            print(f"W: {data['weights']}")
+            print(f"B: {data['bias']}")
+            print(f"Time: {data['training_time']}")
+        else:
+            print(f"{response_dispatch.status_code} - {response_dispatch.text}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", type=str)
     parser.add_argument("--preview", type=str)
-    parser.add_argument("--encrypt", type=str)
+    parser.add_argument("--split", type=str)
+    parser.add_argument("--dispatch", type=str)
     args = parser.parse_args()
 
     main(file=args.file,  
          preview=args.preview,
-         encrypt=args.encrypt
+         split=args.split,
+         dispatch=args.dispatch
         )
