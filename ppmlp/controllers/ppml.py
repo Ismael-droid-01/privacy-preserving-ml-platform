@@ -1,19 +1,20 @@
 import numpy as np
 import pickle
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response,APIRouter as Router
 import time 
 from Pyfhel import Pyfhel, PyCtxt
-from app.ppml import LogisticRegression
 import psutil
 import os
+from ppmlp.services.ml import LogisticRegression
 
 def get_memory_usage():
     process = psutil.Process(os.getpid())
     return process.memory_info().rss / (1024 * 1024)
 
-app = FastAPI()
+# app = FastAPI()
+router = Router(prefix="/ppmlp")
 
-@app.post("/train")
+@router.post("/train")
 async def train(request: Request):
     try:
         body = await request.body()
