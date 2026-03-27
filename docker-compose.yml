@@ -1,5 +1,6 @@
 services:
   ppml-db:
+    profiles: [prod,dev]
     image: mysql:8.0
     restart: always
     environment:
@@ -14,6 +15,7 @@ services:
     networks:
       - ppml-net
   xolo-db:
+    profiles: [prod,dev]
     image: mongo:8-noble
     ports:
       - ${XOLO_MONGODB_PORT-27018}:27017
@@ -27,6 +29,7 @@ services:
 
 
   xolo-cache:
+    profiles: [prod,dev]
     image: redis:7.0.11-alpine
     ports:
       - 6379:6379
@@ -37,6 +40,7 @@ services:
     restart: unless-stopped
 
   xolo:
+    profiles: [prod,dev]
     image: ${XOLO_IMAGE-xolo:api-0.0.11a2}
     container_name: xolo-api
     env_file:
@@ -54,6 +58,7 @@ services:
     command: uvicorn xoloapi.server:app --host ${XOLO_HOST-0.0.0.0} --port ${XOLO_PORT-10000} --log-level debug
 
   ppml:
+    profiles: [prod]
     build:
       context: .
       dockerfile: Dockerfile
