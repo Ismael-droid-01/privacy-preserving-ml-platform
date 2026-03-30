@@ -10,3 +10,4 @@ ppml_server/venv
 *.sqlite3
 *.db
 .DS_Store
+.coverage

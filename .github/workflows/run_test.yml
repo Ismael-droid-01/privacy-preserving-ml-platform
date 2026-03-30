@@ -69,6 +69,12 @@ jobs:
       - name: List PPML Services
         run: |
           docker ps -a
+      - name: Wait for MySQL to be ready
+        run: |
+          until docker exec $(docker ps -qf "name=ppml-db") mysqladmin ping -h "localhost" --silent; do
+            echo "Waiting for database..."
+            sleep 2
+          done
       - name: Lint with Ruff  
         run: |  
           pip install ruff  
