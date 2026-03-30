@@ -66,6 +66,9 @@ jobs:
         env:
           PPML_ENV_FILE_PATH: ${{  env.PPML_ENV_FILE_PATH || '.env.dev' }}
           PPML_PROFILE: ${{ env.PPML_PROFILE || 'prod' }}
+      - name: List PPML Services
+        run: |
+          docker ps -a
       - name: Lint with Ruff  
         run: |  
           pip install ruff  
@@ -76,7 +79,7 @@ jobs:
         run: |  
           poetry run coverage run -m pytest tests/ -v -s
         env:
-          PPML_ENV_FILE_PATH: ${{env.PPML_ENV_FILE_PATH || '.env.dev' }}
+          PPML_ENV_FILE_PATH: '.env.test'
      
       - name: Generate Coverage Report  
         run: |  
