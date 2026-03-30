@@ -7,6 +7,9 @@ from uuid import uuid4
 from tortoise import Tortoise
 import asyncio
 
+
+
+
 TEST_DB_URL = "mysql://samuel_user:samuel_password@localhost:3306/ppml_database" 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -35,6 +38,7 @@ async def test_create_user():
         uid = uuid4().hex[:8]  # Generate a unique identifier for the test user
         username = f"testuser_{uid}"
         password = "password123"
+        print(f"Testing with username: {username} and password: {password}")
         json = DTO.UserCreateFormDTO(
             username   = username,
             email      = f"{username}@example.com",
