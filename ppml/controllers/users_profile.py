@@ -24,10 +24,3 @@ async def login(dto:DTO.UserLoginFormDTO, service:S.UsersService = Depends(MX.ge
     else:        
         raise HTTPException(status_code=500, detail=str(result.unwrap_err() ) )
 
-@router.get("")
-async def get_users():
-    pass
-
-@router.get("/{user_id}")
-async def get_user_by_id(user_id: int):
-    pass
