@@ -6,11 +6,11 @@ from ppml.repositories import UsersProfilesRepository
 from fastapi.security import OAuth2PasswordBearer
 import ppml.config as Cfg
 import ppml.dtos as DTO
-
+from ppml.log import Log
 
 L = Log(
     name = __name__,
-    path = Cfg.JUB_LOG_PATH
+    path = Cfg.LOG_PATH,
 )
 
 
