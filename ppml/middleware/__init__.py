@@ -22,9 +22,9 @@ def get_xolo_client()->XoloClient:
     )
 
 
-def get_users_service(xolo_client:S.XoloClient = Depends(get_xolo_client))->S.UsersService:
+def get_users_service(xolo_client:S.XoloClient = Depends(get_xolo_client))->S.UserProfilesService:
     repository = UsersProfilesRepository()
-    return S.UsersService(repository=repository, xolo=xolo_client)
+    return S.UserProfilesService(repository=repository, xolo=xolo_client)
 
 
 
@@ -33,7 +33,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 async def __get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], 
     temporal_secret_key: Annotated[Optional[str], Header(alias="Temporal-Secret-Key")] = None,
-    users_profiles_service: S.UsersService = Depends(get_users_service),
+    users_profiles_service: S.UserProfilesService = Depends(get_users_service),
     xolo_client: XoloClient = Depends(get_xolo_client)
 ):
 
@@ -52,7 +52,7 @@ async def __get_current_user(
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
         
         user_dto            = user_result.unwrap()
-        user_profile_result = await users_profiles_service.get_user_profile_by_username(username = user_dto.username)
+        user_profile_result = await users_profiles_service.get_by_username(username = user_dto.username)
         # print("User profile result:", user_profile_result)
         if user_profile_result.is_err:
             e = user_profile_result.unwrap_err()
@@ -61,19 +61,19 @@ async def __get_current_user(
             })
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
         user_profile    = user_profile_result.unwrap()
-
-        return DTO.UserProfileDTO(
-            username   = user_profile.username,
+        create_at = user_profile.created_at.isoformat() if user_profile.created_at else None
+        updated_at = user_profile.updated_at.isoformat() if user_profile.updated_at else None
+        user_profile_dto = DTO.UserProfileDTO(
             user_id    = user_profile.user_id,
+            username   = user_profile.username,
             email      = user_profile.email,
-            is_disabled= user_profile.disabled,
             first_name = user_profile.first_name,
             last_name  = user_profile.last_name,
-            fullname   = user_profile.fullname,
-            settings   = DTO.UserPreferencesDTO.from_model(user_profile.settings),
-            created_at = user_profile.created_at.isoformat(),
-            updated_at = user_profile.updated_at.isoformat(),
+            is_disabled= user_profile.is_disabled,
+            created_at = create_at,
+            updated_at = updated_at,
         )
+        return user_profile_dto
         # user_profile = 
 
     except Exception as e:
