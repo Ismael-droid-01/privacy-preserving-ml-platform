@@ -44,3 +44,10 @@ class AlgorithmCreatedResponseDTO(BaseModel):
     algorithm_id: int = Field(..., description="The unique identifier of the created algorithm")
     name: str = Field(..., description="The name of the created algorithm")
     type: str = Field(..., description="The type/category of the created algorithm")
+
+class AlgorithmDTO(BaseModel):
+    algorithm_id: int = Field(..., description="The unique identifier of the algorithm")
+    name: str = Field(..., description="The name of the algorithm")
+    type: str = Field(..., description="The type/category of the algorithm")
+    created_at: str = Field(..., description="The ISO8601 timestamp when the algorithm was created")
+    updated_at: str = Field(..., description="The ISO8601 timestamp when the algorithm was last updated")

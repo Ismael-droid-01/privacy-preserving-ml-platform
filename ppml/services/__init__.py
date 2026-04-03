@@ -4,16 +4,20 @@ from option import Err,Ok,Result
 import ppml.dtos as DTO
 from xolo.client import XoloClient
 from ppml.log import Log
-from ppml.repositories import UsersProfilesRepository
+from ppml.repositories import UsersProfilesRepository, AlgorithmsRepository, NumericParametersRepository, StringParametersRepository
 import os
+
 L = Log(
     name=__name__,
     path=os.environ.get("PPML_LOG_PATH","./logs/"),
 )
+
 class UserProfilesService:
+
     def __init__(self,repository: UsersProfilesRepository, xolo:XoloClient):
         self.repository = repository
         self.xolo = xolo
+    
     async def get_by_username(self, username:str)->Result[UserProfile,Exception]:
         try:
             result = await self.repository.get_by_username(username=username)
@@ -25,6 +29,7 @@ class UserProfilesService:
         except Exception as e:
             L.error(f"Exception occurred while getting user profile by username: {e}")
             return Err(e)
+        
     async def create_user(self,dto:DTO.UserCreateFormDTO)->Result[DTO.UserCreatedResponseDTO,Exception]:
         try:
             result = self.xolo.signup(
@@ -63,6 +68,7 @@ class UserProfilesService:
         except Exception as e:
             L.error(f"Exception occurred while creating user: {e}")
             return Err(e)
+        
     async def login(self,dto:DTO.UserLoginFormDTO)->Result[DTO.UserLoggedInResponseDTO,Exception]:
         try:
             result = self.xolo.auth(
@@ -88,7 +94,76 @@ class UserProfilesService:
         except Exception as e:
             L.error(f"Exception occurred while logging in: {e}")
             return Err(e)
+        
     def get_users(self):
         pass
     def get_user_by_id(self):
         pass
+
+class AlgorithmsService:
+
+    def __init__(self, repository: AlgorithmsRepository):
+        self.repository = repository
+    
+    async def create_algorithm(self, dto:DTO.AlgorithmCreateDTO)->Result[DTO.AlgorithmCreatedResponseDTO,Exception]:
+        try:
+            result = await self.repository.create(
+                name=dto.name,
+                type=dto.type
+            )
+            if result.is_err:
+                L.error(f"Error creating algorithm: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            algorithm = result.unwrap()
+            return Ok(DTO.AlgorithmCreatedResponseDTO(
+                algorithm_id    =   algorithm.algorithm_id,
+                name            =   algorithm.name,
+                type            =   algorithm.type
+            ))
+        except Exception as e:
+            L.error(f"Exception occurred while creating algorithm: {e}")
+            return Err(e)
+    
+    async def get_algorithms(self)->Result[list[DTO.AlgorithmDTO],Exception]:
+        try:
+            result = await self.repository.get_all()
+            if result.is_err:
+                L.error(f"Error getting algorithms: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            algorithms = result.unwrap()
+            return Ok([
+                DTO.AlgorithmDTO(
+                    algorithm_id    =   alg.algorithm_id,
+                    name            =   alg.name,
+                    type            =   alg.type,
+                    created_at      =   alg.created_at.isoformat(),
+                    updated_at      =   alg.updated_at.isoformat(),
+                ) for alg in algorithms
+            ])
+        except Exception as e:
+            L.error(f"Exception occurred while getting algorithms: {e}")
+            return Err(e)
+
+    async def get_algorithm_by_id(self, algorithm_id:int)->Result[DTO.AlgorithmDTO,Exception]:
+        try:
+            result = await self.repository.get_by_id(algorithm_id=algorithm_id)
+            if result.is_err:
+                L.error(f"Error getting algorithm by id: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            algorithm = result.unwrap()
+            return Ok(DTO.AlgorithmDTO(
+                algorithm_id    =   algorithm.algorithm_id,
+                name            =   algorithm.name,
+                type            =   algorithm.type,
+                created_at      =   algorithm.created_at.isoformat(),
+                updated_at      =   algorithm.updated_at.isoformat(),
+            ))
+        except Exception as e:
+            L.error(f"Exception occurred while getting algorithm by id: {e}")
+            return Err(e)
+
+class NumericParametersService:
+    pass
+
+class StringParametersService:
+    pass

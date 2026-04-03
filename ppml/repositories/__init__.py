@@ -71,6 +71,13 @@ class AlgorithmsRepository:
             print(f"Error creating algorithm: {e}")
             return Err(e)
 
+    async def get_all(self)->Result[list[Algorithm],Exception]:
+        try:
+            algorithms = await Algorithm.all()
+            return Ok(algorithms)
+        except Exception as e:
+            return Err(e)
+
     async def get_by_id(self, algorithm_id:int)->Result[Algorithm,Exception]:
         try:
             algorithm = await Algorithm.get_or_none(algorithm_id=algorithm_id)
