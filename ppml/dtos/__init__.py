@@ -35,3 +35,12 @@ class UserProfileDTO(BaseModel):
     is_disabled: bool = Field(default=False, description="Indicates whether the user account is disabled")
     created_at: str = Field(..., description="The ISO8601 timestamp when the user profile was created")
     updated_at: str = Field(..., description="The ISO8601 timestamp when the user profile was last updated")
+
+class AlgorithmCreateDTO(BaseModel):
+    name: str = Field(..., description="The name of the algorithm")
+    type: str = Field(..., description="The type/category of the algorithm")
+
+class AlgorithmCreatedResponseDTO(BaseModel):
+    algorithm_id: int = Field(..., description="The unique identifier of the created algorithm")
+    name: str = Field(..., description="The name of the created algorithm")
+    type: str = Field(..., description="The type/category of the created algorithm")
