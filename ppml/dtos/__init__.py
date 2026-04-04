@@ -36,7 +36,7 @@ class UserProfileDTO(BaseModel):
     created_at: str = Field(..., description="The ISO8601 timestamp when the user profile was created")
     updated_at: str = Field(..., description="The ISO8601 timestamp when the user profile was last updated")
 
-class AlgorithmCreateDTO(BaseModel):
+class AlgorithmCreateFormDTO(BaseModel):
     name: str = Field(..., description="The name of the algorithm")
     type: str = Field(..., description="The type/category of the algorithm")
 
@@ -51,3 +51,18 @@ class AlgorithmDTO(BaseModel):
     type: str = Field(..., description="The type/category of the algorithm")
     created_at: str = Field(..., description="The ISO8601 timestamp when the algorithm was created")
     updated_at: str = Field(..., description="The ISO8601 timestamp when the algorithm was last updated")
+
+class NumericParameterCreateFormDTO(BaseModel):
+    algorithm_id: int = Field(..., description="The unique identifier of the associated algorithm")
+    name: str = Field(..., description="The name of the numeric parameter")
+    type: str = Field(..., description="The data type of the numeric parameter (e.g., 'float', 'int')")
+    default_value: float = Field(..., description="The default value for the numeric parameter")
+    max_value: float = Field(..., description="The maximum allowed value for the numeric parameter")
+
+class NumericParameterCreatedResponseDTO(BaseModel):
+    parameter_id: int = Field(..., description="The unique identifier of the created numeric parameter")
+    algorithm_id: int = Field(..., description="The unique identifier of the associated algorithm")
+    name: str = Field(..., description="The name of the numeric parameter")
+    type: str = Field(..., description="The data type of the numeric parameter (e.g., 'float', 'int')")
+    default_value: float = Field(..., description="The default value for the numeric parameter")
+    max_value: float = Field(..., description="The maximum allowed value for the numeric parameter")

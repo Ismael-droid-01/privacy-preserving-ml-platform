@@ -163,7 +163,55 @@ class AlgorithmsService:
             return Err(e)
 
 class NumericParametersService:
-    pass
+    
+    def __init__(self, repository: NumericParametersRepository):
+        self.repository = repository
+
+    async def create_numeric_parameter(self, dto: DTO.NumericParameterCreateFormDTO)->Result[DTO.NumericParameterCreatedResponseDTO,Exception]:
+        try:
+            result = await self.repository.create(
+                algorithm_id    = dto.algorithm_id,
+                name            = dto.name,
+                type            = dto.type,
+                default_value   = dto.default_value,
+                max_value       = dto.max_value
+            )
+            if result.is_err:
+                L.error(f"Error creating numeric parameter: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            parameter = result.unwrap()
+            return Ok(DTO.NumericParameterCreatedResponseDTO(
+                parameter_id    = parameter.parameter_id,
+                algorithm_id    = parameter.algorithm_id,
+                name            = parameter.name,
+                type            = parameter.type,
+                default_value   = parameter.default_value,
+                max_value       = parameter.max_value
+            ))
+        except Exception as e:
+            L.error(f"Exception occurred while creating numeric parameter: {e}")
+            return Err(e)
+    
+    async def get_numeric_parameters_by_algorithm_id(self, algorithm_id:int)->Result[list[DTO.NumericParameterDTO],Exception]:
+        try:
+            result = await self.repository.get_by_algorithm_id(algorithm_id=algorithm_id)
+            if result.is_err:
+                L.error(f"Error getting numeric parameters by algorithm id: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            parameters = result.unwrap()
+            return Ok([
+                DTO.NumericParameterDTO(
+                    parameter_id    = param.parameter_id,
+                    algorithm_id    = param.algorithm_id,
+                    name            = param.name,
+                    type            = param.type,
+                    default_value   = param.default_value,
+                    max_value       = param.max_value
+                ) for param in parameters
+            ])
+        except Exception as e:
+            L.error(f"Exception occurred while getting numeric parameters by algorithm id: {e}")
+            return Err(e)
 
 class StringParametersService:
     pass
