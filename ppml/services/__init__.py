@@ -214,4 +214,49 @@ class NumericParametersService:
             return Err(e)
 
 class StringParametersService:
-    pass
+    
+    def __init__(self, repository: StringParametersRepository):
+        self.repository = repository
+    
+    async def create_string_parameter(self, dto: DTO.StringParameterCreateFormDTO)->Result[DTO.StringParameterCreatedResponseDTO,Exception]:
+        try:
+            result = await self.repository.create(
+                algorithm_id    = dto.algorithm_id,
+                name            = dto.name,
+                type            = dto.type,
+                default_value   = dto.default_value
+            )
+            if result.is_err:
+                L.error(f"Error creating string parameter: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            parameter = result.unwrap()
+            return Ok(DTO.StringParameterCreatedResponseDTO(
+                parameter_id    = parameter.parameter_id,
+                algorithm_id    = parameter.algorithm_id,
+                name            = parameter.name,
+                type            = parameter.type,
+                default_value   = parameter.default_value
+            ))
+        except Exception as e:
+            L.error(f"Exception occurred while creating string parameter: {e}")
+            return Err(e)
+    
+    async def get_string_parameters_by_algorithm_id(self, algorithm_id:int)->Result[list[DTO.StringParameterDTO],Exception]:
+        try:
+            result = await self.repository.get_by_algorithm_id(algorithm_id=algorithm_id)
+            if result.is_err:
+                L.error(f"Error getting string parameters by algorithm id: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            parameters = result.unwrap()
+            return Ok([
+                DTO.StringParameterDTO(
+                    parameter_id    = param.parameter_id,
+                    algorithm_id    = param.algorithm_id,
+                    name            = param.name,
+                    type            = param.type,
+                    default_value   = param.default_value
+                ) for param in parameters
+            ])
+        except Exception as e:
+            L.error(f"Exception occurred while getting string parameters by algorithm id: {e}")
+            return Err(e)

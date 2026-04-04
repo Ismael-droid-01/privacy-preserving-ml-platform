@@ -76,3 +76,25 @@ class NumericParameterDTO(BaseModel):
     max_value: float = Field(..., description="The maximum allowed value for the numeric parameter")
     created_at: str = Field(..., description="The ISO8601 timestamp when the numeric parameter was created")
     updated_at: str = Field(..., description="The ISO8601 timestamp when the numeric parameter was last updated")
+
+class StringParameterCreateFormDTO(BaseModel):
+    algorithm_id: int = Field(..., description="The unique identifier of the associated algorithm")
+    name: str = Field(..., description="The name of the string parameter")
+    type: str = Field(..., description="The data type of the string parameter (e.g., 'str')")
+    default_value: str = Field(..., description="The default value for the string parameter")
+
+class StringParameterCreatedResponseDTO(BaseModel):
+    parameter_id: int = Field(..., description="The unique identifier of the created string parameter")
+    algorithm_id: int = Field(..., description="The unique identifier of the associated algorithm")
+    name: str = Field(..., description="The name of the string parameter")
+    type: str = Field(..., description="The data type of the string parameter (e.g., 'str')")
+    default_value: str = Field(..., description="The default value for the string parameter")
+
+class StringParameterDTO(BaseModel):
+    parameter_id: int = Field(..., description="The unique identifier of the string parameter")
+    algorithm_id: int = Field(..., description="The unique identifier of the associated algorithm")
+    name: str = Field(..., description="The name of the string parameter")
+    type: str = Field(..., description="The data type of the string parameter (e.g., 'str')")
+    default_value: str = Field(..., description="The default value for the string parameter")
+    created_at: str = Field(..., description="The ISO8601 timestamp when the string parameter was created")
+    updated_at: str = Field(..., description="The ISO8601 timestamp when the string parameter was last updated")
