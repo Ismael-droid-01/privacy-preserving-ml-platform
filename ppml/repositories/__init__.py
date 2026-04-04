@@ -88,16 +88,29 @@ class AlgorithmsRepository:
         except Exception as e:
             return Err(e)
     
-    async def get_by_name(self, name:str)->Result[Algorithm,Exception]:
+    async def get_by_type(self, type:str)->Result[list[Algorithm],Exception]:
         try:
-            algorithm = await Algorithm.get_or_none(name=name)
-            if algorithm:
-                return Ok(algorithm)
+            algorithms = await Algorithm.filter(type=type).all()
+            if algorithms:
+                return Ok(algorithms)
             else:
-                return Err(Exception(f"Algorithm with name {name} not found."))
+                return Err(Exception(f"Algorithms with type {type} not found."))
         except Exception as e:
             return Err(e)
     
+    async def update(self, algorithm_id:int, name:str, type:str)->Result[Algorithm,Exception]:
+        try:
+            algorithm = await Algorithm.get_or_none(algorithm_id=algorithm_id)
+            if algorithm:
+                algorithm.name = name
+                algorithm.type = type
+                await algorithm.save()
+                return Ok(algorithm)
+            else:
+                return Err(Exception(f"Algorithm with id {algorithm_id} not found."))
+        except Exception as e:
+            return Err(e)
+
     async def delete_by_id(self, algorithm_id:int)->Result[bool,Exception]:
         try:
             algorithm = await Algorithm.get_or_none(algorithm_id=algorithm_id)

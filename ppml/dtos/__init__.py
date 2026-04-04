@@ -12,7 +12,6 @@ class UserCreatedResponseDTO(BaseModel):
     username: str = Field(..., description="The username of the created user")
     email: str = Field(..., description="The email address of the created user")
 
-
 class UserLoginFormDTO(BaseModel):
     username: str = Field(..., description="The username of the user attempting to log in")
     password: str = Field(..., description="The password of the user attempting to log in")

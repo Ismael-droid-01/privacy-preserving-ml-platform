@@ -161,6 +161,59 @@ class AlgorithmsService:
         except Exception as e:
             L.error(f"Exception occurred while getting algorithm by id: {e}")
             return Err(e)
+        
+    async def get_algorithms_by_type(self, type:str)->Result[list[DTO.AlgorithmDTO],Exception]:
+        try:
+            result = await self.repository.get_by_type(type=type)
+            if result.is_err:
+                L.error(f"Error getting algorithms by type: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            algorithms = result.unwrap()
+            return Ok([
+                DTO.AlgorithmDTO(
+                    algorithm_id    =   alg.algorithm_id,
+                    name            =   alg.name,
+                    type            =   alg.type,
+                    created_at      =   alg.created_at.isoformat(),
+                    updated_at      =   alg.updated_at.isoformat(),
+                ) for alg in algorithms
+            ])
+        except Exception as e:
+            L.error(f"Exception occurred while getting algorithms by type: {e}")
+            return Err(e)
+    
+    async def update_algorithm(self, algorithm_id:int, dto:DTO.AlgorithmCreateFormDTO)->Result[DTO.AlgorithmDTO,Exception]:
+        try:
+            result = await self.repository.update(
+                algorithm_id=algorithm_id,
+                name=dto.name,
+                type=dto.type
+            )
+            if result.is_err:
+                L.error(f"Error updating algorithm: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            algorithm = result.unwrap()
+            return Ok(DTO.AlgorithmDTO(
+                algorithm_id    =   algorithm.algorithm_id,
+                name            =   algorithm.name,
+                type            =   algorithm.type,
+                created_at      =   algorithm.created_at.isoformat(),
+                updated_at      =   algorithm.updated_at.isoformat(),
+            ))
+        except Exception as e:
+            L.error(f"Exception occurred while updating algorithm: {e}")
+            return Err(e)
+
+    async def delete_algorithm_by_id(self, algorithm_id:int)->Result[bool,Exception]:
+        try:
+            result = await self.repository.delete_by_id(algorithm_id=algorithm_id)
+            if result.is_err:
+                L.error(f"Error deleting algorithm by id: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            return Ok(result.unwrap())
+        except Exception as e:
+            L.error(f"Exception occurred while deleting algorithm by id: {e}")
+            return Err(e)
 
 class NumericParametersService:
     
