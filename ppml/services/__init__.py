@@ -105,7 +105,7 @@ class AlgorithmsService:
     def __init__(self, repository: AlgorithmsRepository):
         self.repository = repository
     
-    async def create_algorithm(self, dto:DTO.AlgorithmCreateDTO)->Result[DTO.AlgorithmCreatedResponseDTO,Exception]:
+    async def create_algorithm(self, dto:DTO.AlgorithmCreateFormDTO)->Result[DTO.AlgorithmCreatedResponseDTO,Exception]:
         try:
             result = await self.repository.create(
                 name=dto.name,
