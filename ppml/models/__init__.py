@@ -33,6 +33,7 @@ class NumericParameter(Model):
         to_field        =   "algorithm_id",
         on_delete       =   fields.CASCADE
     )
+    name            = fields.CharField(max_length=255)
     type            = fields.CharField(max_length=255)
     default_value   = fields.FloatField()
     max_value       = fields.FloatField()
@@ -50,6 +51,7 @@ class StringParameter(Model):
         to_field        =   "algorithm_id",
         on_delete       =   fields.CASCADE
     )
+    name            = fields.CharField(max_length=255)
     default_value   = fields.CharField(max_length=255)
     created_at      = fields.DatetimeField(auto_now_add=True)
     updated_at      = fields.DatetimeField(auto_now=True)
