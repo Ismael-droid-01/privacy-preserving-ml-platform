@@ -1,0 +1,148 @@
+import asyncio
+import pytest
+from httpx import AsyncClient, ASGITransport
+from tortoise import Tortoise
+from ppml.server import app
+from ppml.dtos import AlgorithmCreateFormDTO
+
+TEST_DB_URL = "mysql://samuel_user:samuel_password@localhost:3306/ppml_database"
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(autouse=True, scope="session")
+async def initialize_tests():
+    await Tortoise.init(
+        db_url=TEST_DB_URL,
+        modules={"models": ["ppml.models"]}
+    )
+    await Tortoise.generate_schemas()
+    yield
+    await Tortoise.close_connections()
+
+
+@pytest.mark.asyncio
+async def test_create_algorithm_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        payload = AlgorithmCreateFormDTO(name="DecisionTree", type="classification").model_dump()
+        response = await client.post("/algorithms", json=payload)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["name"] == "DecisionTree"
+        assert data["type"] == "classification"
+        assert "algorithm_id" in data
+
+
+@pytest.mark.asyncio
+async def test_create_algorithm_duplicate_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        payload = AlgorithmCreateFormDTO(name="DuplicateAlgo", type="regression").model_dump()
+        first = await client.post("/algorithms", json=payload)
+        assert first.status_code == 200
+        second = await client.post("/algorithms", json=payload)
+        assert second.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_get_all_algorithms_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        payload = AlgorithmCreateFormDTO(name="NaiveBayes", type="classification").model_dump()
+        await client.post("/algorithms", json=payload)
+        response = await client.get("/algorithms/list")
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        assert len(data) > 0
+        assert all("algorithm_id" in alg for alg in data)
+        assert all("name" in alg for alg in data)
+        assert all("type" in alg for alg in data)
+
+
+@pytest.mark.asyncio
+async def test_get_algorithm_by_id_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        payload = AlgorithmCreateFormDTO(name="RandomForest", type="classification").model_dump()
+        create_response = await client.post("/algorithms", json=payload)
+        assert create_response.status_code == 200
+        algorithm_id = create_response.json()["algorithm_id"]
+        response = await client.get(f"/algorithms/{algorithm_id}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["algorithm_id"] == algorithm_id
+        assert data["name"] == "RandomForest"
+
+
+@pytest.mark.asyncio
+async def test_get_algorithm_by_id_not_found_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/algorithms/999999")
+        assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_algorithms_by_type_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        payload = AlgorithmCreateFormDTO(name="GradientBoosting", type="regression").model_dump()
+        await client.post("/algorithms", json=payload)
+        response = await client.get("/algorithms/type/regression")
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        assert all(alg["type"] == "regression" for alg in data)
+
+
+@pytest.mark.asyncio
+async def test_get_algorithms_by_type_not_found_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/algorithms/type/nonexistent_type")
+        assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_update_algorithm_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        payload = AlgorithmCreateFormDTO(name="OldName", type="regression").model_dump()
+        create_response = await client.post("/algorithms", json=payload)
+        assert create_response.status_code == 200
+        algorithm_id = create_response.json()["algorithm_id"]
+        updated_payload = AlgorithmCreateFormDTO(name="NewName", type="classification").model_dump()
+        response = await client.put(f"/algorithms/{algorithm_id}", json=updated_payload)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["name"] == "NewName"
+        assert data["type"] == "classification"
+
+
+@pytest.mark.asyncio
+async def test_update_algorithm_not_found_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        payload = AlgorithmCreateFormDTO(name="Ghost", type="regression").model_dump()
+        response = await client.put("/algorithms/999999", json=payload)
+        assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_delete_algorithm_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        payload = AlgorithmCreateFormDTO(name="ToDelete", type="classification").model_dump()
+        create_response = await client.post("/algorithms", json=payload)
+        assert create_response.status_code == 200
+        algorithm_id = create_response.json()["algorithm_id"]
+        response = await client.delete(f"/algorithms/{algorithm_id}")
+        assert response.status_code == 200
+        assert response.json()["message"] == "Algorithm deleted successfully."
+        get_response = await client.get(f"/algorithms/{algorithm_id}")
+        assert get_response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_delete_algorithm_not_found_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.delete("/algorithms/999999")
+        assert response.status_code == 404
