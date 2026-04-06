@@ -2,7 +2,7 @@ import ppml.services as S
 from xolo.client import XoloClient
 from typing import Annotated, Optional
 from fastapi import Depends,Header,HTTPException
-from ppml.repositories import UsersProfilesRepository
+from ppml.repositories import AlgorithmsRepository, NumericParametersRepository, UsersProfilesRepository
 from fastapi.security import OAuth2PasswordBearer
 import ppml.config as Cfg
 import ppml.dtos as DTO
@@ -89,3 +89,12 @@ async def get_current_user(
             detail=f"User {current_user.user_id} is disabled."
         )
     return current_user
+
+def get_algorithms_service() -> S.AlgorithmsService:
+    return S.AlgorithmsService(repository=AlgorithmsRepository())
+
+def get_numeric_parameters_service() -> S.NumericParametersService:
+    return S.NumericParametersService(repository=NumericParametersRepository())
+
+def get_string_parameters_service() -> S.StringParametersService:
+    return S.StringParametersService(repository=S.StringParametersRepository())
