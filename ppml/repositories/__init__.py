@@ -121,6 +121,23 @@ class AlgorithmsRepository:
                 return Err(Exception(f"Algorithm with id {algorithm_id} not found."))
         except Exception as e:
             return Err(e)
+    
+    async def get_parameters_by_algorithm_id(self, algorithm_id: int) -> Result[dict, Exception]:
+        try:
+            algorithm = await Algorithm.get_or_none(algorithm_id=algorithm_id)
+            if not algorithm:
+                return Err(Exception(f"Algorithm with id {algorithm_id} not found."))
+            
+            numeric_parameters = await NumericParameter.filter(algorithm_id=algorithm_id).all()
+            string_parameters  = await StringParameter.filter(algorithm_id=algorithm_id).all()
+            
+            return Ok({
+                "algorithm_id"      : algorithm_id,
+                "numeric_parameters": numeric_parameters,
+                "string_parameters" : string_parameters
+            })
+        except Exception as e:
+            return Err(e)
 
 class NumericParametersRepository:
 

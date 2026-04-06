@@ -94,3 +94,8 @@ class StringParameterDTO(BaseModel):
     default_value: str = Field(..., description="The default value for the string parameter")
     created_at: str = Field(..., description="The ISO8601 timestamp when the string parameter was created")
     updated_at: str = Field(..., description="The ISO8601 timestamp when the string parameter was last updated")
+
+class AlgorithmParametersDTO(BaseModel):
+    algorithm_id: int = Field(..., description="The unique identifier of the algorithm")
+    numeric_parameters: list[NumericParameterDTO] = Field(default=[], description="List of numeric parameters for the algorithm")
+    string_parameters: list[StringParameterDTO] = Field(default=[], description="List of string parameters for the algorithm")
