@@ -4,7 +4,7 @@ from option import Err,Ok,Result
 import ppml.dtos as DTO
 from xolo.client import XoloClient
 from ppml.log import Log
-from ppml.repositories import TasksRepository, UsersProfilesRepository, AlgorithmsRepository, NumericParametersRepository, StringParametersRepository
+from ppml.repositories import ResultsRepository, TasksRepository, UsersProfilesRepository, AlgorithmsRepository, NumericParametersRepository, StringParametersRepository
 import os
 
 L = Log(
@@ -534,4 +534,51 @@ class TasksService:
             ))
         except Exception as e:
             L.error(f"Exception occurred while getting task by id: {e}")
+            return Err(e)
+
+class ResultsService:
+
+    def __init__(self, repository: ResultsRepository):
+        self.repository = repository
+    
+    async def create_result(self, task_id: int, dto: DTO.ResultCreateFormDTO) -> Result[DTO.ResultCreatedResponseDTO, Exception]:
+        try:
+            result = await self.repository.create(
+                task_id =   task_id,
+                format  =   dto.format,
+                url     =   dto.url
+            )
+            if result.is_err:
+                L.error(f"Error creating result: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            created_result = result.unwrap()
+            return Ok(DTO.ResultCreatedResponseDTO(
+                result_id   = created_result.result_id,
+                task_id     = created_result.task_id,
+                format      = created_result.format,
+                url         = created_result.url
+            ))
+        except Exception as e:
+            L.error(f"Exception occurred while creating result: {e}")
+            return Err(e)
+    
+    async def get_results_by_task_id(self, task_id: int) -> Result[list[DTO.ResultDTO], Exception]:
+        try:
+            result = await self.repository.get_by_task_id(task_id=task_id)
+            if result.is_err:
+                L.error(f"Error getting results by task id: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            results = result.unwrap()
+            return Ok([
+                DTO.ResultDTO(
+                    result_id   = res.result_id,
+                    task_id     = res.task_id,
+                    format      = res.format,
+                    url         = res.url,
+                    created_at  = res.created_at.isoformat(),
+                    updated_at  = res.updated_at.isoformat(),
+                ) for res in results
+            ])
+        except Exception as e:
+            L.error(f"Exception occurred while getting results by task id: {e}")
             return Err(e)
