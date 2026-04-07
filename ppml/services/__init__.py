@@ -214,6 +214,42 @@ class AlgorithmsService:
         except Exception as e:
             L.error(f"Exception occurred while deleting algorithm by id: {e}")
             return Err(e)
+    
+    async def get_algorithm_parameters(self, algorithm_id: int) -> Result[DTO.AlgorithmParametersDTO, Exception]:
+        try:
+            result = await self.repository.get_parameters_by_algorithm_id(algorithm_id=algorithm_id)
+            if result.is_err:
+                L.error(f"Error getting algorithm parameters: {result.unwrap_err()}")
+                return Err(result.unwrap_err())
+            data = result.unwrap()
+            return Ok(DTO.AlgorithmParametersDTO(
+                algorithm_id        = data["algorithm_id"],
+                numeric_parameters  = [
+                    DTO.NumericParameterDTO(
+                        parameter_id    = param.parameter_id,
+                        algorithm_id    = param.algorithm_id,
+                        name            = param.name,
+                        type            = param.type,
+                        default_value   = param.default_value,
+                        max_value       = param.max_value,
+                        created_at      = param.created_at.isoformat(),
+                        updated_at      = param.updated_at.isoformat()
+                    ) for param in data["numeric_parameters"]
+                ],
+                string_parameters   = [
+                    DTO.StringParameterDTO(
+                        parameter_id    = param.parameter_id,
+                        algorithm_id    = param.algorithm_id,
+                        name            = param.name,
+                        default_value   = param.default_value,
+                        created_at      = param.created_at.isoformat(),
+                        updated_at      = param.updated_at.isoformat()
+                    ) for param in data["string_parameters"]
+                ]
+            ))
+        except Exception as e:
+            L.error(f"Exception occurred while getting algorithm parameters: {e}")
+            return Err(e)
 
 class NumericParametersService:
     

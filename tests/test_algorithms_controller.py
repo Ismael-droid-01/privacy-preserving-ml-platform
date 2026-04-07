@@ -3,7 +3,7 @@ import pytest
 from httpx import AsyncClient, ASGITransport
 from tortoise import Tortoise
 from ppml.server import app
-from ppml.dtos import AlgorithmCreateFormDTO
+from ppml.dtos import AlgorithmCreateFormDTO, NumericParameterCreateFormDTO, StringParameterCreateFormDTO
 
 @pytest.mark.asyncio
 async def test_create_algorithm_endpoint():
@@ -123,4 +123,45 @@ async def test_delete_algorithm_endpoint():
 async def test_delete_algorithm_not_found_endpoint():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.delete("/algorithms/999999")
+        assert response.status_code == 404
+    
+
+@pytest.mark.asyncio
+async def test_get_algorithm_parameters_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        algorithm_payload = AlgorithmCreateFormDTO(name="SVMAlgo", type="classification").model_dump()
+        create_response = await client.post("/algorithms", json=algorithm_payload)
+        assert create_response.status_code == 200
+        algorithm_id = create_response.json()["algorithm_id"]
+
+        numeric_payload = NumericParameterCreateFormDTO(
+            algorithm_id  = algorithm_id,
+            name          = "C",
+            type          = "float",
+            default_value = 1.0,
+            max_value     = 10.0
+        ).model_dump()
+        await client.post("/numeric-parameters", json=numeric_payload)
+
+        string_payload = StringParameterCreateFormDTO(
+            algorithm_id  = algorithm_id,
+            name          = "kernel",
+            default_value = "rbf"
+        ).model_dump()
+        await client.post("/string-parameters", json=string_payload)
+
+        response = await client.get(f"/algorithms/{algorithm_id}/parameters")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["algorithm_id"] == algorithm_id
+        assert len(data["numeric_parameters"]) == 1
+        assert len(data["string_parameters"]) == 1
+        assert data["numeric_parameters"][0]["name"] == "C"
+        assert data["string_parameters"][0]["name"] == "kernel"
+
+
+@pytest.mark.asyncio
+async def test_get_algorithm_parameters_not_found_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/algorithms/999999/parameters")
         assert response.status_code == 404
