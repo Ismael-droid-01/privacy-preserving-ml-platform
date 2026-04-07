@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import pytest
 from tortoise import Tortoise
 
-from ppml.models import Task, UserProfile, Algorithm, NumericParameter, StringParameter
+from ppml.models import Task, UserProfile, Algorithm, NumericParameter, StringParameter, Result as ResultModel
 
 def pytest_configure(config):
     if os.path.exists(".env.test"):
@@ -39,6 +39,7 @@ async def clean_database():
     await _clean()
 
 async def _clean():
+    await ResultModel.all().delete()
     await Task.all().delete()         
     await NumericParameter.all().delete()
     await StringParameter.all().delete()
