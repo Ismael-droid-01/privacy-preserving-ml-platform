@@ -1,5 +1,5 @@
 
-from ppml.models import UserProfile, Algorithm, NumericParameter, StringParameter
+from ppml.models import UserProfile, Algorithm, NumericParameter, StringParameter, Task
 from option import Err,Ok,Result
 
 class UsersProfilesRepository:
@@ -264,5 +264,48 @@ class StringParametersRepository:
                 return Ok(True)
             else:
                 return Err(Exception(f"String parameter with id {parameter_id} not found."))
+        except Exception as e:
+            return Err(e)
+
+class TasksRepository:
+
+    async def create(self, user_id: str, algorithm_id: int, response_time: float) -> Result[Task, Exception]:
+        try:
+            user = await UserProfile.get_or_none(user_id=user_id)
+            if not user:
+                raise Exception(f"User with id {user_id} not found.")
+            
+            algorithm = await Algorithm.get_or_none(algorithm_id=algorithm_id)
+            if not algorithm:
+                raise Exception(f"Algorithm with id {algorithm_id} not found.")
+            
+            task = await Task.create(
+                user       = user,
+                algorithm  = algorithm,
+                response_time = response_time
+            )
+            return Ok(task)
+        except Exception as e:
+            print(f"Error creating task: {e}")
+            return Err(e)
+
+    async def get_by_id(self, task_id: int) -> Result[Task, Exception]:
+        try:
+            task = await Task.get_or_none(task_id=task_id)
+            if task:
+                return Ok(task)
+            else:
+                return Err(Exception(f"Task with id {task_id} not found."))
+        except Exception as e:
+            return Err(e)
+
+    async def get_by_user_id(self, user_id: str) -> Result[list[Task], Exception]:
+        try:
+            user = await UserProfile.get_or_none(user_id=user_id)
+            if not user:
+                return Err(Exception(f"User with id {user_id} not found."))
+            
+            tasks = await Task.filter(user_id=user_id).all()
+            return Ok(tasks)
         except Exception as e:
             return Err(e)
