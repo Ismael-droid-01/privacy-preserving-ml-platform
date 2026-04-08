@@ -117,3 +117,22 @@ class TaskDTO(BaseModel):
     response_time: float = Field(..., description="The expected response time for the task execution in seconds")
     created_at: str = Field(..., description="The ISO8601 timestamp when the task was created")
     updated_at: str = Field(..., description="The ISO8601 timestamp when the task was last updated")
+
+class ResultCreateFormDTO(BaseModel):  
+    task_id: int = Field(..., description="The unique identifier of the task associated with this result")
+    format: str = Field(..., description="The format of the result (e.g., 'json', 'csv')")
+    url: str = Field(..., description="The URL where the result can be accessed")
+
+class ResultCreatedResponseDTO(BaseModel):  
+    result_id: int = Field(..., description="The unique identifier of the created result")
+    task_id: int = Field(..., description="The unique identifier of the task associated with this result")
+    format: str = Field(..., description="The format of the result (e.g., 'json', 'csv')")
+    url: str = Field(..., description="The URL where the result can be accessed")
+
+class ResultDTO(BaseModel): 
+    result_id: int = Field(..., description="The unique identifier of the result")
+    task_id: int = Field(..., description="The unique identifier of the task associated with this result")
+    format: str = Field(..., description="The format of the result (e.g., 'json', 'csv')")
+    url: str = Field(..., description="The URL where the result can be accessed")
+    created_at: str = Field(..., description="The ISO8601 timestamp when the result was created")
+    updated_at: str = Field(..., description="The ISO8601 timestamp when the result was last updated")

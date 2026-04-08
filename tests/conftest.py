@@ -6,7 +6,7 @@ import pymysql
 import pytest
 from tortoise import Tortoise
 from tortoise.contrib.test import tortoise_test_context
-from ppml.models import Task, UserProfile, Algorithm, NumericParameter, StringParameter
+from ppml.models import Task, UserProfile, Algorithm, NumericParameter, StringParameter,Result
 
 DATABASE_NAME = "ppml_database"
 USER= "samuel_user"
@@ -49,6 +49,7 @@ async def clean_database():
     await _clean()
 
 async def _clean():
+    await Result.all().delete()
     await Task.all().delete()         
     await NumericParameter.all().delete()
     await StringParameter.all().delete()
