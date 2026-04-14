@@ -17,8 +17,8 @@ class UserProfile(Model):
         table = "user_profiles"
 
 class AlgorithmType(str, Enum):
-    CLUSTERING  = "CLUSTERING"
-    ML          = "ML"
+    SUPERVISED  = "SUPERVISED"
+    UNSUPERVISED = "UNSUPERVISED"
 
 class Algorithm(Model):
     algorithm_id    = fields.IntField(primary_key=True)
