@@ -1,7 +1,5 @@
-import asyncio
 import pytest
 from httpx import AsyncClient, ASGITransport
-from tortoise import Tortoise
 from calpulli.server import app
 from calpulli.dtos import AlgorithmCreateFormDTO, StringParameterCreateFormDTO
 

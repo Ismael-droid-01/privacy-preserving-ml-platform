@@ -1,8 +1,8 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 from calpulli.services import TasksService
-from calpulli.repositories import TasksRepository, UsersProfilesRepository, AlgorithmsRepository
-from calpulli.dtos import TaskCreateFormDTO, UserProfileDTO
+from calpulli.repositories import TasksRepository
+from calpulli.dtos import TaskCreateFormDTO
 from calpulli.server import app
 import calpulli.middleware as MX
 from tests.conftest import create_test_algorithm, create_test_user, mock_current_user
