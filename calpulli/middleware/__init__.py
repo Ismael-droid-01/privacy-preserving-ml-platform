@@ -10,7 +10,7 @@ from calpulli.log import Log
 
 L = Log(
     name = __name__,
-    path = Cfg.LOG_PATH,
+    path = Cfg.CALPULLI_LOG_PATH,
 )
 
 
