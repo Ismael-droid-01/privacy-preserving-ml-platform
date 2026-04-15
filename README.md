@@ -22,7 +22,7 @@ To get started with CALPULLI, follow these steps:
 For local development, you can run the FastAPI server directly without Docker:
 1. Activate the virtual environment: `poetry shell`
 2. Deploy the database and Xolo services using Docker Compose and select only the development profile: `docker-compose --profile dev --env-file .env.dev -f docker-compose.yml up`
-2. Start the FastAPI server: `uvicorn ppml.server:app --host ${CALPULLI_HOST:-0.0.0.0} --port ${CALPULLI_PORT:-5000} --reload`
+2. Start the FastAPI server: `uvicorn calpulli.server:app --host ${CALPULLI_HOST:-0.0.0.0} --port ${CALPULLI_PORT:-5000} --reload`
 This will start the server with hot-reloading enabled, allowing you to see changes in real-time.
 
 ## Contributing
