@@ -8,7 +8,7 @@ CALPULLI is a platform that enables users to train machine learning models while
 - Poetry shell for activating the virtual environment `poetry self add poetry-plugin-shell`
 - Git for version control
 - Docker for containerization (optional, but recommended for development and deployment)
-
+- Install `roryclient` for interacting with the Rory API: `poetry add roryclient==0.1.13 --source test --allow-prereleases`
 ## Getting started
 To get started with CALPULLI, follow these steps:
 1. Clone the repository: `git clone git@github.com:Ismael-droid-01/calpulli-api.git`
@@ -24,6 +24,7 @@ For local development, you can run the FastAPI server directly without Docker:
 2. Deploy the database and Xolo services using Docker Compose and select only the development profile: `docker-compose --profile dev --env-file .env.dev -f docker-compose.yml up`
 2. Start the FastAPI server: `uvicorn calpulli.server:app --host ${CALPULLI_HOST:-0.0.0.0} --port ${CALPULLI_PORT:-5000} --reload`
 This will start the server with hot-reloading enabled, allowing you to see changes in real-time.
+
 
 ## Contributing
 Contributions to CALPULLI are welcome! If you have an idea for a new feature or improvement, please open an issue or submit a pull request. Please make sure to follow the code of conduct and the contribution guidelines.
