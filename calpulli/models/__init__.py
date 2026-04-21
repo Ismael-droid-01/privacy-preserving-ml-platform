@@ -89,6 +89,7 @@ class StringParameter(Model):
 class TaskStatus(str, Enum):
     PENDING = "PENDING"
     COMPLETED = "COMPLETED"
+    RUNNING = "RUNNING"
     FAILED = "FAILED"
 
 class Task(Model):
