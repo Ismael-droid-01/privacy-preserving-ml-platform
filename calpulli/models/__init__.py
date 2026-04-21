@@ -135,6 +135,11 @@ class StringParameter(Model):
     class Meta:
         table = "string_parameters"
 
+class TaskStatus(str, Enum):
+    PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
+    RUNNING = "RUNNING"
+    FAILED = "FAILED"
 class StringParameterValue(Model):
     parameter_value_id    = fields.IntField(primary_key=True)
     parameter   = fields.ForeignKeyField(
@@ -170,6 +175,7 @@ class Task(Model):
         # to_field        =   "id",
         on_delete       =   fields.RESTRICT
     )
+    status         = fields.CharEnumField(TaskStatus, max_length=50, default=TaskStatus.PENDING)
     response_time    = fields.FloatField() 
     created_at      = fields.DatetimeField(auto_now_add=True)
     updated_at      = fields.DatetimeField(auto_now=True)
