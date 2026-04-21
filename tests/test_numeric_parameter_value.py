@@ -2,66 +2,6 @@ import pytest
 from calpulli.models import Algorithm, AlgorithmType, NumericParameter, NumericParameterType, NumericParameterValue, Task, UserProfile
 
 
-# --- Fixtures ---
-
-@pytest.fixture
-async def algorithm(clean_database):
-    return await Algorithm.create(name="TestAlgo", type=AlgorithmType.SUPERVISED)
-
-
-@pytest.fixture
-async def user(clean_database):
-    return await UserProfile.create(
-        user_id="user-123",
-        username="testuser",
-        email="test@test.com",
-        first_name="Test",
-        last_name="User"
-    )
-
-
-@pytest.fixture
-async def task(algorithm, user):
-    return await Task.create(
-        algorithm=algorithm,
-        user=user,
-        response_time=0.0
-    )
-
-
-@pytest.fixture
-async def float_parameter(algorithm):
-    return await NumericParameter.create(
-        algorithm=algorithm,
-        name="learning_rate",
-        type=NumericParameterType.FLOAT,
-        default_value=0.01,
-        max_value=1.0
-    )
-
-
-@pytest.fixture
-async def integer_parameter(algorithm):
-    return await NumericParameter.create(
-        algorithm=algorithm,
-        name="n_estimators",
-        type=NumericParameterType.INTEGER,
-        default_value=100,
-        max_value=500
-    )
-
-
-@pytest.fixture
-async def boolean_parameter(algorithm):
-    return await NumericParameter.create(
-        algorithm=algorithm,
-        name="use_bias",
-        type=NumericParameterType.BOOLEAN,
-        default_value=0,
-        max_value=1
-    )
-
-
 # --- Tests FLOAT ---
 
 @pytest.mark.asyncio
