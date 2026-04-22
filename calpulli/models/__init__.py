@@ -175,6 +175,13 @@ class Task(Model):
         # to_field        =   "id",
         on_delete       =   fields.RESTRICT
     )
+    dataset        = fields.ForeignKeyField(
+        "models.Dataset",
+        related_name    =   "tasks",
+        to_field        =   "dataset_id",
+        on_delete       =   fields.RESTRICT,
+        null           =   True
+    )
     status         = fields.CharEnumField(TaskStatus, max_length=50, default=TaskStatus.PENDING)
     response_time    = fields.FloatField() 
     created_at      = fields.DatetimeField(auto_now_add=True)
@@ -198,3 +205,19 @@ class Result(Model):
 
     class Meta:
         table = "results"
+
+class Dataset(Model):
+    dataset_id  = fields.IntField(primary_key=True)
+    user        = fields.ForeignKeyField(
+        "models.UserProfile",
+        related_name    = "datasets",
+        on_delete       = fields.RESTRICT
+    )
+    name        = fields.CharField(max_length=255)
+    extension   = fields.CharField(max_length=50)
+    created_at  = fields.DatetimeField(auto_now_add=True)
+    updated_at  = fields.DatetimeField(auto_now=True)
+
+    class Meta:
+        table = "datasets"
+        unique_together = (("user", "name"),)

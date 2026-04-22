@@ -123,3 +123,6 @@ def get_tasks_service(
 
 def get_task_consumer(request:Request) -> TaskConsumer:
     return request.app.state.task_consumer
+
+def get_datasets_service() -> S.DatasetsService:
+    return S.DatasetsService(repository=S.DatasetsRepository())

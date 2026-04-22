@@ -2,16 +2,14 @@
 import asyncio
 import os
 from typing import List, Tuple,AsyncGenerator
-from wsgiref import headers
 from dotenv import load_dotenv
 import pymysql
 import pytest
 from httpx import ASGITransport, AsyncClient
 
 from tortoise import Tortoise
-from tortoise.contrib.test import tortoise_test_context
-from calpulli.models import NumericParameterType, StringParameterValue, NumericParameterValue, Task, UserProfile, Algorithm, NumericParameter, StringParameter,Result
-from calpulli.dtos import UserProfileDTO, TaskCreateFormDTO
+from calpulli.models import NumericParameterType, StringParameterValue, NumericParameterValue, Task, UserProfile, Algorithm, NumericParameter, StringParameter,Result,Dataset
+from calpulli.dtos import UserProfileDTO
 from calpulli.repositories import UsersProfilesRepository, AlgorithmsRepository, TasksRepository
 from calpulli.server import app
 import calpulli.dtos as DTO
@@ -120,7 +118,8 @@ async def _clean():
     await Task.all().delete()         
     await NumericParameter.all().delete()
     await StringParameter.all().delete()
-    await Algorithm.all().delete()    
+    await Algorithm.all().delete()
+    await Dataset.all().delete()    
     await UserProfile.all().delete()
 
 def mock_current_user(user_id: str, username: str):
@@ -253,3 +252,31 @@ async def prepare_with_user_algorithm_task_client(get_user_clean_and_get_client)
             DTO.TaskCreatedResponseDTO.model_validate(task_data)
         )
     return user,algorithm,tasks,client
+
+async def register_and_login_user(client: AsyncClient, suffix: str):
+    """Función auxiliar para crear un usuario y obtener su DTO de login."""
+    x_id = f"{suffix}_{uuid4().hex[:4]}"
+    dto = DTO.UserCreateFormDTO(
+        email=f"user_{x_id}@test.com",
+        username=f"user_{x_id}",
+        password="testpassword",
+        first_name=f"Name_{x_id}",
+        last_name=f"Last_{x_id}"
+    )
+    
+    register_response = await client.post("/users", json=dto.model_dump())
+    assert register_response.status_code == 200, f"Error al registrar: {register_response.text}"
+
+    response = await client.post("/users/login", json={"username": dto.username, "password": dto.password})
+    assert response.status_code == 200, f"Error al iniciar sesión: {response.text}"
+    
+    data = response.json()
+    return DTO.UserLoggedInResponseDTO(
+        user_id=data.get("user_id"),
+        access_token=data.get("access_token"),
+        temporal_secret=data.get("temporal_secret"),
+        username=data.get("username"),
+        email=data.get("email"),
+        first_name=data.get("first_name"),
+        last_name=data.get("last_name")
+    )
