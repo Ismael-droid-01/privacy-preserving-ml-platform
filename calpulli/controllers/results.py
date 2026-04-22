@@ -4,7 +4,7 @@ import calpulli.services as S
 import calpulli.dtos as DTO
 router = Router(prefix="/results")
 
-@router.get("/{result_id}", response_model=DTO.TaskResultDTO)
+@router.get("/{result_id}", response_model=DTO.ResultDTO)
 async def get_result(
     result_id: int, 
     current_user:DTO.UserProfileDTO = Depends(MX.get_current_user),

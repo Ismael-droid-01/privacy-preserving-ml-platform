@@ -10,7 +10,6 @@ import calpulli.config as Cfg
 from typing import Union
 from roryclient.models import KmeansResponse, KnnResponse, NncResponse
 
-from tests.conftest import task
 L= Log(
     name = __name__,
     path = Cfg.CALPULLI_LOG_PATH,

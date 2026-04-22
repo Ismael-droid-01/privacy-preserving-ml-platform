@@ -4,16 +4,13 @@ from calpulli.dtos import ResultCreateFormDTO
 from calpulli.repositories import ResultsRepository
 from calpulli.services import ResultsService
 from calpulli.server import app
-from tests.conftest import create_test_algorithm,  create_test_user
+from tests.conftest import create_test_algorithm,  create_test_user, create_test_task
 
 @pytest.mark.asyncio
 async def test_create_result():
     user      = await create_test_user(suffix="result-create")
     algorithm = await create_test_algorithm(name="AlgoResultCreate")
-    # You must create a task to be able to create a result, but since the task creation is tested in other test, you can just create a task directly using the repositories or services without going through the API endpoints. This way you can isolate the test for the ResultsService and not depend on the Task creation logic.
-    task = None
-    # task      = await create_test_task(user_id=user.user_id, algorithm_id=algorithm.algorithm_id)
-
+    task      = await create_test_task(user_id=user.id, algorithm_id=algorithm.algorithm_id)
     service = ResultsService(repository=ResultsRepository())
     dto     = ResultCreateFormDTO(task_id=task.task_id, format="json", url="http://example.com/result.json")
     result  = await service.create_result(task_id=task.task_id, dto=dto)
@@ -38,7 +35,7 @@ async def test_get_results_by_task_id():
     user      = await create_test_user(suffix="result-get")
     algorithm = await create_test_algorithm(name="AlgoResultGet")
     task = None
-    # task      = await create_test_task(user_id=user.user_id, algorithm_id=algorithm.algorithm_id)
+    task      = await create_test_task(user_id=user.id, algorithm_id=algorithm.algorithm_id)
 
     service = ResultsService(repository=ResultsRepository())
     

@@ -9,9 +9,8 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from tortoise import Tortoise
-from tortoise.contrib.test import tortoise_test_context
 from calpulli.models import NumericParameterType, StringParameterValue, NumericParameterValue, Task, UserProfile, Algorithm, NumericParameter, StringParameter,Result
-from calpulli.dtos import UserProfileDTO, TaskCreateFormDTO
+from calpulli.dtos import UserProfileDTO
 from calpulli.repositories import UsersProfilesRepository, AlgorithmsRepository, TasksRepository
 from calpulli.server import app
 import calpulli.dtos as DTO
@@ -150,6 +149,15 @@ async def create_test_user(suffix: str = "")-> UserProfile:
     )
     return result.unwrap()
 
+async def create_test_task(user_id: str, algorithm_id: int)-> Task:
+    repo = TasksRepository()
+    result = await repo.create(
+        algorithm_id  = algorithm_id,
+        user_id       = user_id,
+        response_time = 0.0
+    )
+    return result.unwrap()
+
 @pytest.fixture
 async def user():
     idd = uuid4().hex[:8]
@@ -253,3 +261,35 @@ async def prepare_with_user_algorithm_task_client(get_user_clean_and_get_client)
             DTO.TaskCreatedResponseDTO.model_validate(task_data)
         )
     return user,algorithm,tasks,client
+
+async def register_and_login_user(client: AsyncClient, username_suffix: str) -> DTO.UserLoggedInResponseDTO:
+    x_id = f"{username_suffix}_{uuid4().hex[:6]}"
+    
+    create_dto = DTO.UserCreateFormDTO(
+        email      = f"{x_id}@test.com",
+        username   = x_id,
+        password   = "testpassword",
+        first_name = "Test",
+        last_name  = "User"
+    )
+    register_response = await client.post("/users", json=create_dto.model_dump())
+    assert register_response.status_code == 200
+
+    login_payload = {
+        "username": x_id,
+        "password": "testpassword"
+    }
+    login_response = await client.post("/users/login", json=login_payload)
+    assert login_response.status_code == 200
+    
+    data = login_response.json()
+    
+    return DTO.UserLoggedInResponseDTO(
+        first_name      = data.get("first_name"),
+        last_name       = data.get("last_name"),
+        temporal_secret = data.get("temporal_secret"),
+        user_id         = data.get("user_id"),
+        access_token    = data.get("access_token"),
+        email           = data.get("email"),
+        username        = data.get("username")
+    )
