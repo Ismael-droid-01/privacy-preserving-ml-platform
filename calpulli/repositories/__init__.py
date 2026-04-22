@@ -482,3 +482,17 @@ class ResultsRepository:
                 return Err(Exception(f"Result with id {result_id} not found."))
         except Exception as e:
             return Err(e)
+    
+    async def delete_by_id(self, result_id: int, user_profile_id: int) -> Result[bool, Exception]:
+        try:
+            result = await ResultModel.get_or_none(
+                result_id=result_id,
+                task__user_id=user_profile_id
+            )
+            if result:
+                await result.delete()
+                return Ok(True)
+            else:
+                return Err(Exception(f"Result with id {result_id} not found."))
+        except Exception as e:
+            return Err(e)
