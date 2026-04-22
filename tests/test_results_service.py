@@ -1,9 +1,7 @@
-from httpx import ASGITransport, AsyncClient
 import pytest
 from calpulli.dtos import ResultCreateFormDTO
 from calpulli.repositories import ResultsRepository
 from calpulli.services import ResultsService
-from calpulli.server import app
 from tests.conftest import create_test_algorithm,  create_test_user, create_test_task
 
 @pytest.mark.asyncio

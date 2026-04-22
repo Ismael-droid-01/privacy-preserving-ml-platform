@@ -2,7 +2,6 @@
 import asyncio
 import os
 from typing import List, Tuple,AsyncGenerator
-from wsgiref import headers
 from dotenv import load_dotenv
 import pymysql
 import pytest

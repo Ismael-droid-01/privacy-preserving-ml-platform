@@ -1,8 +1,7 @@
 import pytest
-from httpx import AsyncClient
 from calpulli.models import UserProfile
 from calpulli.repositories import ResultsRepository
-from tests.conftest import algorithm, create_test_task, register_and_login_user
+from tests.conftest import create_test_task, register_and_login_user
 
 @pytest.mark.asyncio
 async def test_get_result_endpoint_success(get_user_clean_and_get_client, task, algorithm):
