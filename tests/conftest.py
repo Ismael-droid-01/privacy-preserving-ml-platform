@@ -263,10 +263,13 @@ async def register_and_login_user(client: AsyncClient, suffix: str):
         first_name=f"Name_{x_id}",
         last_name=f"Last_{x_id}"
     )
-    # Registrar
-    await client.post("/users", json=dto.model_dump())
-    # Login
+    
+    register_response = await client.post("/users", json=dto.model_dump())
+    assert register_response.status_code == 200, f"Error al registrar: {register_response.text}"
+
     response = await client.post("/users/login", json={"username": dto.username, "password": dto.password})
+    assert response.status_code == 200, f"Error al iniciar sesión: {response.text}"
+    
     data = response.json()
     return DTO.UserLoggedInResponseDTO(
         user_id=data.get("user_id"),

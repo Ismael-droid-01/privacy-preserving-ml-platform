@@ -12,16 +12,26 @@ async def upload_dataset(
     current_user: DTO.UserProfileDTO = Depends(MX.get_current_user),
     service: S.DatasetsService = Depends(MX.get_datasets_service)
 ):
-    if not file.filename:
-        raise HTTPException(status_code=400, detail="No file uploaded")
-    name, ext = os.path.splitext(file.filename)
+    raw_filename = file.filename or ""
+    sanitized_filename = os.path.basename(raw_filename)
+
+    if not sanitized_filename:
+        raise HTTPException(status_code=400, detail="File must have a valid name")
+
+    name, ext = os.path.splitext(sanitized_filename)
+    
+    normalized_name = name.strip()
     extension = ext.lstrip(".")
 
+    if not normalized_name or not extension:
+        raise HTTPException(status_code=400, detail="The file must have a valid name and extension")
+    
     result = await service.register(
         user_id=current_user.user_id,
-        name=name,
+        name=normalized_name,
         extension=extension
     )
+    
     if result.is_ok:
         return result.unwrap()
     raise HTTPException(status_code=500, detail=str(result.unwrap_err()))

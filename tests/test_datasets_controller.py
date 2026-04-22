@@ -40,7 +40,6 @@ async def test_get_user_datasets_endpoint(get_user_clean_and_get_client):
     headers = {"Authorization": f"Bearer {user.access_token}", "Temporal-Secret-Key": user.temporal_secret}
 
     for filename in ["dataset_a.csv", "dataset_b.json"]:
-        name, ext = filename.rsplit(".", 1)
         file = {"file": (filename, io.BytesIO(b"data"), "application/octet-stream")}
         await client.post("/datasets", files=file, headers=headers)
 
