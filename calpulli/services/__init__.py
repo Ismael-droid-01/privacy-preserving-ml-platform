@@ -1,5 +1,5 @@
 
-from typing import Union
+from typing import BinaryIO, Union
 from calpulli.models import UserProfile
 from option import Err,Ok,Result
 import calpulli.dtos as DTO
@@ -8,6 +8,7 @@ from calpulli.log import Log
 from calpulli.repositories import DatasetsRepository, ResultsRepository, TasksRepository, UsersProfilesRepository, AlgorithmsRepository, NumericParametersRepository, StringParametersRepository
 import os
 from roryclient.models import KmeansResponse, KnnResponse, NncResponse
+import calpulli.config as Cfg
 
 L = Log(
     name=__name__,
@@ -681,6 +682,11 @@ class DatasetsService:
                 L.error(f"Error registering dataset: {result.unwrap_err()}")
                 return Err(result.unwrap_err())
             dataset = result.unwrap()
+
+
+
+
+
             return Ok(DTO.DatasetCreatedResponseDTO(
                 dataset_id = dataset.dataset_id,
                 user_id    = dataset.user_id,
@@ -690,7 +696,18 @@ class DatasetsService:
         except Exception as e:
             L.error(f"Exception occurred while registering dataset: {e}")
             return Err(e)
-    
+    async def write_dataset_file(self, filename: str, file_data: BinaryIO) -> Result[bool, Exception]:
+        try:
+            from pathlib import Path
+            import shutil
+            dest_path = Path(f"{Cfg.CALPULLI_DATASET_SINK_PATH}/{filename}")
+            # async with aiofiles.open(dest_path, 'wb') as f:
+            with dest_path.open('wb') as f:
+                shutil.copyfileobj(file_data, f)
+            return Ok(True)
+        except Exception as e:
+            L.error(f"Exception occurred while writing dataset file: {e}")
+            return Err(e)
     async def get_by_user_id(self, user_id: str) -> Result[list[DTO.DatasetDTO], Exception]:
         try:
             result = await self.repository.get_by_user_id(user_id=user_id)

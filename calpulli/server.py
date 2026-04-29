@@ -1,3 +1,4 @@
+import os 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import calpulli.config as Cfg
@@ -7,18 +8,38 @@ from contextlib import asynccontextmanager
 
 from calpulli.core.worker.consumer import TaskConsumer
 
+from calpulli.log import Log
+import calpulli.config as Cfg
+
+L= Log(
+    name= __name__,
+    path= Cfg.CALPULLI_LOG_PATH
+)
+
 
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Starting up...")
+    L.debug("Starting lifespan context manager")
+    
     task_consumer = TaskConsumer(n_workers=Cfg.CALPULLI_WORKERS_COUNT, max_queue_size=Cfg.CALPULLI_WORKER_QUEUE_SIZE)
     app.state.task_consumer = task_consumer
-
+    L.debug("Starting TaskConsumer")
     await app.state.task_consumer.start()
+    # Create dataset sink directory if it doesn't exist
+    try:
+        if not os.path.exists(Cfg.CALPULLI_DATASET_SINK_PATH):
+            os.makedirs(Cfg.CALPULLI_DATASET_SINK_PATH,exist_ok=True)
+            L.debug(f"Created dataset sink path: {Cfg.CALPULLI_DATASET_SINK_PATH}")
+        else:
+            L.debug(f"Dataset sink path already exists: {Cfg.CALPULLI_DATASET_SINK_PATH}")
+    except Exception as e:
+        L.error(f"Error creating dataset sink at {Cfg.CALPULLI_DATASET_SINK_PATH}: {e}")
+        # raise e
+
     yield
-    print("Shutting down...")
+    L.debug("Stopping lifespan context manager")
     await app.state.task_consumer.stop()
 
 
