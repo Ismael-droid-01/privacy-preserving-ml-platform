@@ -2,14 +2,12 @@ import pytest
 from calpulli.dtos import ResultCreateFormDTO
 from calpulli.repositories import ResultsRepository
 from calpulli.services import ResultsService
-from tests.conftest import create_test_algorithm,  create_test_user, create_test_task
 
 @pytest.mark.asyncio
-async def test_create_result():
-    user      = await create_test_user(suffix="result-create")
-    algorithm = await create_test_algorithm(name="AlgoResultCreate")
-    task      = await create_test_task(user_id=user.id, algorithm_id=algorithm.algorithm_id)
+async def test_create_result(prepare_with_user_algorithm_task_client):
+    user,algorithm,task,_ = prepare_with_user_algorithm_task_client
     service = ResultsService(repository=ResultsRepository())
+    task  = task[0]  # Get the actual Task object from the tuple
     dto     = ResultCreateFormDTO(task_id=task.task_id, format="json", url="http://example.com/result.json")
     result  = await service.create_result(task_id=task.task_id, dto=dto)
 
@@ -29,15 +27,13 @@ async def test_create_result_task_not_found():
     assert result.is_err
 
 @pytest.mark.asyncio
-async def test_get_results_by_task_id():
-    user      = await create_test_user(suffix="result-get")
-    algorithm = await create_test_algorithm(name="AlgoResultGet")
-    task = None
-    task      = await create_test_task(user_id=user.id, algorithm_id=algorithm.algorithm_id)
+async def test_get_results_by_task_id(prepare_with_user_algorithm_task_client):
+    user,algorithm,task,_ = prepare_with_user_algorithm_task_client
 
     service = ResultsService(repository=ResultsRepository())
     
     # Create multiple results for the same task
+    task = task[0]  # Get the actual Task object from the tuple
     for i in range(3):
         dto = ResultCreateFormDTO(task_id=task.task_id, format="json", url=f"http://example.com/result_{i}.json")
         await service.create_result(task_id=task.task_id, dto=dto)

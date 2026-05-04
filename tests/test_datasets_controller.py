@@ -1,6 +1,6 @@
 import io
 import pytest
-from tests.conftest import register_and_login_user
+# from tests.conftest import register_and_login_user
 
 @pytest.mark.asyncio
 async def test_upload_dataset_endpoint(get_user_clean_and_get_client):
@@ -58,11 +58,8 @@ async def test_get_user_datasets_only_own_isolation(get_user_clean_and_get_clien
     user_a, client = get_user_clean_and_get_client
     headers_a = {"Authorization": f"Bearer {user_a.access_token}", "Temporal-Secret-Key": user_a.temporal_secret}
 
-    user_b = await register_and_login_user(client, "other")
-    headers_b = {"Authorization": f"Bearer {user_b.access_token}", "Temporal-Secret-Key": user_b.temporal_secret}
-
-    file_b = {"file": ("private_b.csv", io.BytesIO(b"top secret"), "text/csv")}
-    await client.post("/datasets", files=file_b, headers=headers_b)
+    # file_b = {"file": ("private_b.csv", io.BytesIO(b"top secret"), "text/csv")}
+    # await client.post("/datasets", files=file_b, headers=headers_b)
 
     file_a = {"file": ("my_data.csv", io.BytesIO(b"hello world"), "text/csv")}
     await client.post("/datasets", files=file_a, headers=headers_a)

@@ -64,6 +64,19 @@ jobs:
           mkdir -p "${CALPULLI_DATASET_SINK_PATH}"
       
 
+      - name: Deploy Xolo Service
+        run: |
+          docker compose --profile dev --env-file ${{ env.CALPULLI_ENV_FILE_PATH || '.env.dev' }} -f docker-compose.yml up -d xolo xolo-cache xolo-db 
+        env:
+          CALPULLI_ENV_FILE_PATH: ${{  env.CALPULLI_ENV_FILE_PATH || '.env.dev' }}
+      - name: Provisioning Xolo Account and Get API KEY
+        run: |
+          echo "Creating Account..."
+          ACC_ID=$(curl -s -X POST "$BASE_URL/accounts" -H "Content-Type: application/json" -d '{"name": "CI_Test_Account"}' | jq -r '.id')
+          echo "Generating API Key..."
+          API_KEY=$(curl -s -X POST "$BASE_URL/accounts/$ACC_ID/apikeys" -H "Content-Type: application/json" -d '{"name": "CI_Key"}' | jq -r '.key')    
+          echo "XOLO_API_KEY=$API_KEY" >> $GITHUB_ENV
+          echo "::add-mask::$API_KEY"
       - name: Start CALPULLI Service
         run: |
           chmod +x deploy.sh && ./deploy.sh ${CALPULLI_PROFILE} ${{ env.CALPULLI_ENV_FILE_PATH || '.env.dev' }}

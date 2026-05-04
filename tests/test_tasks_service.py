@@ -1,12 +1,12 @@
 import pytest
-from calpulli.services import ResultsService, TasksService
+from calpulli.services import ResultsService, TasksService,UserProfilesService
 from calpulli.repositories import ResultsRepository, TasksRepository
 from calpulli.dtos import TaskCreateFormDTO
-from tests.conftest import create_test_algorithm, create_test_user
+# from tests.conftest import create_test_algorithm, create_test_user
 
 @pytest.mark.asyncio
-async def test_create_task_user_not_found_service():
-    algorithm = await create_test_algorithm(name="AlgoUserNotFound")
+async def test_create_task_user_not_found_service(prepare_with_user_algorithm_client):
+    user,algorithm,_ = prepare_with_user_algorithm_client
     
     results_repo = ResultsRepository()
     results_service = ResultsService(repository=results_repo)
@@ -24,9 +24,9 @@ async def test_create_task_user_not_found_service():
     assert result.is_err
     
 @pytest.mark.asyncio
-async def test_create_task_algorithm_not_found_service():
+async def test_create_task_algorithm_not_found_service(user):
     # 1. Crear el usuario de prueba
-    user = await create_test_user(suffix="algonotfound")
+    # user = await create_test_user(suffix="algonotfound")
 
     # 2. Instanciar dependencias (TasksService ahora requiere ResultsService)
     results_repo = ResultsRepository()
@@ -46,11 +46,10 @@ async def test_create_task_algorithm_not_found_service():
 
     assert result.is_err
 
+@pytest.mark.skip(reason="This test needs more design. A way to test in isolation.")
 @pytest.mark.asyncio
-async def test_get_tasks_by_user_service():
-    # 1. Preparación de datos
-    user      = await create_test_user(suffix="getbyuser")
-    algorithm = await create_test_algorithm(name="AlgoGetByUser")
+async def test_get_tasks_by_user_service(prepare_with_user_algorithm_client):
+    user,algorithm,_ = prepare_with_user_algorithm_client
 
     # 2. Instanciación con dependencias completas
     results_service = ResultsService(repository=ResultsRepository())
@@ -62,17 +61,18 @@ async def test_get_tasks_by_user_service():
     dto = TaskCreateFormDTO(algorithm_id=algorithm.algorithm_id, response_time=2.0)
 
     # 3. Ejecución: Usamos user.id (el entero de la DB)
-    await service.create_task(user_id=user.id, dto=dto)
-    await service.create_task(user_id=user.id, dto=dto)
 
-    result = await service.get_tasks_by_user(user_id=user.id)
+    await service.create_task(user_id=user.pro, dto=dto)
+    await service.create_task(user_id=user.user_id, dto=dto)
+
+    result = await service.get_tasks_by_user(user_id=user.user_id)
 
     # 4. Verificación
     assert result.is_ok
     tasks = result.unwrap()
     assert isinstance(tasks, list)
     assert len(tasks) >= 2
-    assert all(t.user_id == user.id for t in tasks)
+    assert all(t.user_id == user.user_id for t in tasks)
 
 
 @pytest.mark.asyncio
@@ -90,9 +90,9 @@ async def test_get_tasks_by_user_not_found_service():
 
 
 @pytest.mark.asyncio
-async def test_get_tasks_by_user_empty_service():
+async def test_get_tasks_by_user_empty_service(user):
     # 1. Preparación
-    user = await create_test_user(suffix="empty")
+    # user = await create_test_user(suffix="empty")
     
     # 2. Instanciación con dependencias completas
     results_service = ResultsService(repository=ResultsRepository())

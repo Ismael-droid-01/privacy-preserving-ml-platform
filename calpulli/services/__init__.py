@@ -632,6 +632,7 @@ class TasksService:
         except Exception as e:
             L.error(f"Error fetching task aggregate: {e}")
             return Err(e)
+        
     async def create_task(
         self, 
         user_id: int,           
