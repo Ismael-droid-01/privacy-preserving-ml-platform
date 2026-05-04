@@ -64,6 +64,21 @@ jobs:
           mkdir -p "${CALPULLI_DATASET_SINK_PATH}"
       
 
+      - name: Start Infrastructure for Provisioning
+        run: |
+          docker compose --env-file ${{ env.CALPULLI_ENV_FILE_PATH || '.env.dev' }} --profile dev -f docker-compose.yml up -d xolo xolo-db xolo-cache
+          
+      - name: Provision Xolo Account
+        run: |
+          echo "::group::Xolo Provisioning Logs"
+          chmod +x ./setup_xolo.sh
+          ./setup_xolo.sh
+          echo "::endgroup::"
+          echo "Current .env.dev state:"
+          grep "XOLO_API_KEY" .env.dev || echo "Key not found in file"
+        env:
+          X_ADMIN_TOKEN: ${{ secrets.XOLO_ADMIN_TOKEN }}
+
       - name: Start CALPULLI Service
         run: |
           chmod +x deploy.sh && ./deploy.sh ${CALPULLI_PROFILE} ${{ env.CALPULLI_ENV_FILE_PATH || '.env.dev' }}
@@ -84,10 +99,6 @@ jobs:
           pip install ruff  
           ruff check .  
         continue-on-error: true  
-      - name: Create scope
-        run: |
-          chmod +x ./create_scope.sh 
-          ./create_scope.sh
       - name: Test with pytest  
         run: |  
           poetry run coverage run -m pytest tests/ -v -s

@@ -24,3 +24,6 @@ XOLO_SECRET_KEY                  = os.environ.get("XOLO_SECRET_KEY","default_sec
 RORY_HOSTNAME                    = os.environ.get("RORY_HOSTNAME", "localhost")
 RORY_PORT                        = int(os.environ.get("RORY_PORT", 3001))
 RORY_TIMEOUT                     = int(os.environ.get("RORY_TIMEOUT", 5))
+XOLO_ACCOUNT_ID         = os.environ.get("XOLO_ACCOUNT_ID","calpulli-2eeaaade566b762cfaaa28e9a3318bc0")
+XOLO_API_KEY            = os.environ.get("XOLO_API_KEY","XOLO_USERS_AG1Q9JDIBZ4_SJLYX4KQW5KLCHHSF1MPBRGZJCEINDW")
+XOLO_ADMIN_TOKEN         = os.environ.get("XOLO_ADMIN_TOKEN","XOLO_USERS_AG1Q9JDIBZ4_SJLYX4KQW5KLCHHSF1MPBRGZJCEINDW")
