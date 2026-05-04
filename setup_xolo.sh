@@ -3,44 +3,58 @@ set -e
 
 XOLO_URL="http://localhost:10000"
 ENV_FILE=".env.dev"
-# Use a default if the secret isn't passed for local testing
 ADMIN_TOKEN="${X_ADMIN_TOKEN:-admin_token_here}"
 
+# 1. Wait for the documentation page instead of /health
 echo "Waiting for Xolo API to be ready..."
-timeout 30s sh -c "until curl -s $XOLO_URL/docs; do sleep 1; done" || (echo "Xolo timed out" && exit 1)
+timeout 30s sh -c "until curl -s $XOLO_URL/docs > /dev/null; do sleep 1; done" || (echo "Xolo timed out" && exit 1)
 
+# 2. Creating Account
+# Double check if your router is mounted at /accounts, /api/accounts, or /api/v4/accounts
 echo "Creating Account..."
-# Matches CreateAccountDTO(account_id: str, name: str)
-curl -s -X POST "$XOLO_URL/api/v4/accounts" \
+ACCOUNT_URL="$XOLO_URL/api/v4/accounts"
+
+curl -s -X POST "$ACCOUNT_URL" \
   -H "Content-Type: application/json" \
   -H "X-Admin-Token: $ADMIN_TOKEN" \
   -d '{"account_id": "calpulli_ci", "name": "CI Test Account"}'
 
-echo "Generating API Key..."
-# Matches CreateAPIKeyDTO(name: str, scopes: list[APIKeyScope])
-# Note: Adjust "all" to your specific Enum value
-RESPONSE=$(curl -s -X POST "$XOLO_URL/api/v4/accounts/calpulli_ci/apikeys" \
+echo -e "\nGenerating API Key..."
+# 3. Generating API Key
+# Note: Ensure "all" is a valid value in your APIKeyScope Enum
+RESPONSE=$(curl -s -X POST "$ACCOUNT_URL/calpulli_ci/apikeys" \
   -H "Content-Type: application/json" \
   -H "X-Admin-Token: $ADMIN_TOKEN" \
-  -d '{"name": "ci_key", "scopes": ["all"]}')
+  -d '{
+    "name": "ci_key", 
+    "scopes": ["all"]
+  }')
 
-# Extract 'key' from CreatedAPIKeyResponseDTO
-API_KEY=$(echo "$RESPONSE" | jq -r '.key')
+# 4. Extraction & Validation
+API_KEY=$(echo "$RESPONSE" | jq -r '.key // empty')
 
-if [ "$API_KEY" == "null" ] || [ -z "$API_KEY" ]; then
-  echo "Error: API Key is empty. Full response: $RESPONSE"
+if [ -z "$API_KEY" ] || [ "$API_KEY" == "null" ]; then
+  echo "Error: Could not extract API Key."
+  echo "Full response: $RESPONSE"
+  # Check if the error is a 404 again
+  if [[ "$RESPONSE" == *"Not Found"* ]]; then
+    echo "Check if the route is actually mounted at $ACCOUNT_URL"
+  fi
   exit 1
 fi
 
+# 5. Update .env.dev
 echo "Updating $ENV_FILE..."
-# Replace existing XOLO_API_KEY or append if missing
 if grep -q "XOLO_API_KEY=" "$ENV_FILE"; then
   sed -i "s|^XOLO_API_KEY=.*|XOLO_API_KEY=$API_KEY|" "$ENV_FILE"
 else
   echo "XOLO_API_KEY=$API_KEY" >> "$ENV_FILE"
 fi
 
-# Export for the current GitHub Action runner process
-echo "XOLO_API_KEY=$API_KEY" >> $GITHUB_ENV
-echo "::add-mask::$API_KEY"
-echo "Success: Environment updated."
+# 6. Export for GitHub Actions
+if [ -n "$GITHUB_ENV" ]; then
+  echo "XOLO_API_KEY=$API_KEY" >> $GITHUB_ENV
+  echo "::add-mask::$API_KEY"
+fi
+
+echo "Success: XOLO_API_KEY set in $ENV_FILE"
