@@ -2346,23 +2346,26 @@ description = ""
 optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
-files = []
-develop = true
+files = [
+    {file = "xolo-0.1.0a0-py3-none-any.whl", hash = "sha256:341c52cdd2ee30e58dc472dcac21070b42304c9d112929c390f5a914aef8d697"},
+    {file = "xolo-0.1.0a0.tar.gz", hash = "sha256:7aa395e57cbe339be606b4e5e42ced5e1af6becea2deff2275209868e128e1d6"},
+]
 
 [package.dependencies]
-cryptography = "^42.0.5"
-humanfriendly = "^10.0"
-networkx = "^3.4.2"
-option = "^2.1.0"
-pycryptodome = "^3.20.0"
-pydantic = "^2.11.4"
-pyparsing = "^3.2.5"
-python-dotenv = "^1.1.0"
-requests = "^2.31.0"
+cryptography = ">=42.0.5,<43.0.0"
+humanfriendly = ">=10.0,<11.0"
+networkx = ">=3.4.2,<4.0.0"
+option = ">=2.1.0,<3.0.0"
+pycryptodome = ">=3.20.0,<4.0.0"
+pydantic = ">=2.11.4,<3.0.0"
+pyparsing = ">=3.2.5,<4.0.0"
+python-dotenv = ">=1.1.0,<2.0.0"
+requests = ">=2.31.0,<3.0.0"
 
 [package.source]
-type = "directory"
-url = "../xolo"
+type = "legacy"
+url = "https://test.pypi.org/simple"
+reference = "test"
 
 [[package]]
 name = "zensical"
@@ -2399,4 +2402,4 @@ tomli = {version = ">=2.0", markers = "python_full_version < \"3.11.0\""}
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "640f305dd94e38c8f16eee46a79ae5211c44da6c81f554d121c801b8237b3a3e"
+content-hash = "1a5609903733943079864d5df368572bbcbf05f59f2d93b42728afad0fc4d5ba"
